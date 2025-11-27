@@ -1,0 +1,457 @@
+/* 页面样式 */
+.container {
+  padding: 40rpx;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 40rpx;
+  text-align: center;
+}
+
+.form-item {
+  margin-bottom: 40rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  background: white;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: #c8a882;
+}
+
+/* 单选框组 */
+.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 40rpx;
+}
+
+.radio-text {
+  margin-left: 10rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 历法选择标签 */
+.calendar-tabs {
+  display: flex;
+  gap: 20rpx;
+}
+
+.tab-button {
+  flex: 1;
+  height: 80rpx;
+  background: #f0f0f0;
+  color: #666;
+  border: none;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-button.active {
+  background: #c8a882;
+  color: white;
+}
+
+/* 选择器样式 */
+.picker {
+  width: 100%;
+  height: 80rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  background: white;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  color: #333;
+}
+
+.datetime-section {
+  display: flex;
+  gap: 20rpx;
+}
+
+.datetime-section .picker {
+  flex: 1;
+}
+
+/* 农历输入 */
+.lunar-datetime {
+  .lunar-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10rpx;
+    flex-wrap: wrap;
+    margin-bottom: 20rpx;
+  }
+
+  .lunar-input {
+    width: 100rpx;
+    height: 60rpx;
+    border: 2rpx solid #e0e0e0;
+    border-radius: 6rpx;
+    padding: 0 10rpx;
+    font-size: 24rpx;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .leap-month {
+    display: flex;
+    align-items: center;
+    gap: 10rpx;
+    font-size: 28rpx;
+    color: #666;
+  }
+}
+
+/* 四柱选择按钮 */
+.sizhu-btn {
+  width: 100%;
+  height: 80rpx;
+  background: #f0f0f0;
+  color: #666;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 主按钮 */
+.btn {
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, #c8a882 0%, #b8956f 100%);
+  color: white;
+  border: none;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20rpx;
+}
+
+.btn:active {
+  opacity: 0.8;
+}
+
+.btn.reset-btn {
+  background: #999;
+  margin-top: 20rpx;
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sizhu-modal {
+  width: 90%;
+  max-width: 600rpx;
+  background: white;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.close-btn {
+  width: 60rpx;
+  height: 60rpx;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 50%;
+  font-size: 36rpx;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sizhu-content {
+  padding: 40rpx;
+}
+
+.sizhu-grid {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.sizhu-column {
+  flex: 1;
+  text-align: center;
+}
+
+.column-title {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.pillar-display {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.pillar-char {
+  width: 80rpx;
+  height: 80rpx;
+  background: #f0f0f0;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pillar-char:active {
+  background: #e0e0e0;
+}
+
+.info-text {
+  margin-bottom: 40rpx;
+  text-align: center;
+}
+
+.year-range,
+.ganzhi-rule {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.confirm-btn {
+  width: 100%;
+  height: 80rpx;
+  background: #c8a882;
+  color: white;
+  border: none;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+/* 天干地支选择器 */
+.ganzhi-picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ganzhi-picker {
+  width: 80%;
+  max-width: 500rpx;
+  background: white;
+  border-radius: 16rpx;
+  padding: 40rpx;
+}
+
+.ganzhi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20rpx;
+}
+
+.ganzhi-grid.dizhi-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.ganzhi-option {
+  width: 80rpx;
+  height: 80rpx;
+  background: #f0f0f0;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ganzhi-option:active {
+  background: #c8a882;
+  color: white;
+}
+
+.ganzhi-option.disabled {
+  background: #f8f8f8;
+  color: #ccc;
+  border-color: #f0f0f0;
+}
+
+/* 结果显示 */
+.result-card {
+  margin-top: 40rpx;
+}
+
+.sizhu-display {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.pillar {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+}
+
+.pillar-header {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.gan-zhi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.gan,
+.zhi {
+  width: 60rpx;
+  height: 60rpx;
+  background: white;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 6rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10rpx;
+}
+
+.nayin {
+  font-size: 20rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.shengwang {
+  font-size: 20rpx;
+  padding: 4rpx 8rpx;
+  border-radius: 4rpx;
+  display: inline-block;
+}
+
+.shengwang.strong {
+  background: #e8f5e8;
+  color: #4caf50;
+}
+
+.shengwang.weak {
+  background: #fff3e0;
+  color: #ff9800;
+}
+
+.sizhu-text {
+  text-align: center;
+}
+
+.sizhu-summary {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.lunar-info {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.jieqi-info {
+  .jieqi-item {
+    font-size: 24rpx;
+    color: #666;
+    margin-bottom: 10rpx;
+    display: block;
+  }
+
+  .next-jieqi {
+    color: #999;
+  }
+}
