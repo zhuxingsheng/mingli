@@ -7,6 +7,7 @@ import { getShengwangState, getShengwangLevel } from './utils/shengwang'
 import { calculateTaisuiShensha } from './utils/taisui'
 import { getShenshaForDizhi } from './utils/shensha'
 import { getXiji, XijiResult } from './utils/xiji'
+import { sizhuToSolar, MatchedDate, isValidSizhu } from './utils/sizhuReverse'
 import './App.css'
 
 type CalendarType = 'solar' | 'lunar'
@@ -86,6 +87,10 @@ function App() {
   const [selectedTianganPosition, setSelectedTianganPosition] = useState<'hour' | 'day' | 'month' | 'year' | 'minggong' | 'shengong' | 'taigong' | null>(null)
   // 右侧面板的tab选项
   const [rightPanelTab, setRightPanelTab] = useState<string>('xiji')
+  // 四柱反推日期选择相关状态
+  const [showDatePickerModal, setShowDatePickerModal] = useState(false)
+  const [matchedDates, setMatchedDates] = useState<MatchedDate[]>([])
+  const [isSearching, setIsSearching] = useState(false)
 
   const handleCalculate = () => {
     try {
@@ -234,34 +239,9 @@ function App() {
           gender: genderText
         })
       } else if (timeModalType === 'sizhu') {
-        // 四柱手动输入
-        if (!manualSizhu.year.tian || !manualSizhu.year.di ||
-            !manualSizhu.month.tian || !manualSizhu.month.di ||
-            !manualSizhu.day.tian || !manualSizhu.day.di ||
-            !manualSizhu.hour.tian || !manualSizhu.hour.di) {
-          alert('请完整选择四柱')
-          return
-        }
-
-        result = {
-          birthYear: new Date().getFullYear(),
-          year: {
-            tian: manualSizhu.year.tian,
-            di: manualSizhu.year.di
-          },
-          month: {
-            tian: manualSizhu.month.tian,
-            di: manualSizhu.month.di
-          },
-          day: {
-            tian: manualSizhu.day.tian,
-            di: manualSizhu.day.di
-          },
-          hour: {
-            tian: manualSizhu.hour.tian,
-            di: manualSizhu.hour.di
-          }
-        }
+        // 四柱手动输入 - 调用反推函数
+        handleManualSizhuConfirm()
+        return
       } else {
         alert('请先选择时间')
         return
@@ -307,29 +287,93 @@ function App() {
       }
     }
 
-    // 创建手动选择的四柱结果
-    const manualResult: SizhuResult = {
-      birthYear: new Date().getFullYear(),
-      year: {
-        tian: finalSizhu.year.tian,
-        di: finalSizhu.year.di
-      },
-      month: {
-        tian: finalSizhu.month.tian,
-        di: finalSizhu.month.di
-      },
-      day: {
-        tian: finalSizhu.day.tian,
-        di: finalSizhu.day.di
-      },
-      hour: {
-        tian: finalSizhu.hour.tian,
-        di: finalSizhu.hour.di
-      }
+    // 检查四柱是否为有效组合
+    if (!isValidSizhu(finalSizhu)) {
+      alert('四柱组合无效，请检查天干地支是否符合六十甲子规则')
+      return
     }
 
-    setSizhuResult(manualResult)
+    // 开始搜索匹配的日期
+    setIsSearching(true)
+
+    // 使用 setTimeout 让 UI 有时间更新显示"搜索中"状态
+    setTimeout(() => {
+      try {
+        const dates = sizhuToSolar(finalSizhu, 1801, 2099)
+        setIsSearching(false)
+
+        if (dates.length === 0) {
+          alert('在1801-2099年范围内未找到匹配的日期')
+          return
+        }
+
+        if (dates.length === 1) {
+          // 只有一个匹配结果，直接使用该日期排盘
+          handleDateSelect(dates[0])
+        } else {
+          // 多个匹配结果，显示选择弹窗
+          setMatchedDates(dates)
+          setShowDatePickerModal(true)
+        }
+      } catch (error) {
+        setIsSearching(false)
+        alert('搜索日期时出错，请重试')
+        console.error(error)
+      }
+    }, 50)
+  }
+
+  // 用户选择匹配日期后的处理
+  const handleDateSelect = (selectedDate: MatchedDate) => {
+    const { year, month, day, hour, minute } = selectedDate.solar
+    const date = new Date(year, month - 1, day, hour, minute, 0)
+
+    // 使用 calculateSizhu 计算完整的四柱结果
+    const result = calculateSizhu(date, gender)
+
+    // 计算节气信息
+    const timeline = getJieqiTimeline(date)
+    setJieqiTimeline(timeline)
+
+    // 设置输入时间信息用于显示
+    const lunarInfo = solarToLunar({
+      year,
+      month,
+      day,
+      hour,
+      minute
+    })
+
+    // 计算时辰
+    const dizhiNames = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
+    const shichenIndex = hour === 23 ? 0 : Math.floor((hour + 1) / 2)
+    const shichen = dizhiNames[shichenIndex]
+    const genderText = gender === 'male' ? '乾造' : '坤造'
+
+    // 农历日期名称
+    const dayNames = ['', '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+      '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+      '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十']
+
+    const lunarText = `农历${lunarInfo.year}年 ${lunarInfo.isLeap ? '闰' : ''}${lunarInfo.monthName}月${dayNames[lunarInfo.day] || lunarInfo.day} ${shichen}时 ${genderText}`
+    const solarText = `公历${year}年${month}月${day}日 ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+
+    setInputTimeInfo({
+      lunar: lunarText,
+      solar: solarText,
+      gender: genderText
+    })
+
+    // 设置公历时间并切换到公历模式
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const dateTimeStr = `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`
+    setBirthDateTime(dateTimeStr)
+    setTimeModalType('solar')
+
+    setSizhuResult(result)
+    setShowDatePickerModal(false)
     setShowSizhuModal(false)
+    setMatchedDates([])
   }
 
   // 键盘事件监听
@@ -849,7 +893,15 @@ function App() {
 
               <button
                 className="confirm-btn"
-                onClick={() => setShowTimeModal(false)}
+                onClick={() => {
+                  if (timeModalType === 'sizhu') {
+                    // 四柱模式：先关闭弹窗，再调用反推函数
+                    setShowTimeModal(false)
+                    handleManualSizhuConfirm()
+                  } else {
+                    setShowTimeModal(false)
+                  }
+                }}
               >
                 确定
               </button>
@@ -1053,6 +1105,75 @@ function App() {
                     </button>
                   )
                 })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 搜索中遮罩 */}
+        {isSearching && (
+          <div className="modal-overlay">
+            <div className="searching-modal">
+              <div className="searching-spinner"></div>
+              <div className="searching-text">正在搜索匹配日期...</div>
+            </div>
+          </div>
+        )}
+
+        {/* 日期选择弹窗 */}
+        {showDatePickerModal && matchedDates.length > 0 && (
+          <div className="modal-overlay" onClick={() => setShowDatePickerModal(false)}>
+            <div className="date-picker-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>选择具体时间</h3>
+                <button
+                  className="close-btn"
+                  onClick={() => setShowDatePickerModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="date-picker-content">
+                <div className="gender-select-row">
+                  <span className="gender-label">性别：</span>
+                  <div className="gender-options">
+                    <label className={`gender-option ${gender === 'male' ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        name="gender-picker"
+                        value="male"
+                        checked={gender === 'male'}
+                        onChange={() => setGender('male')}
+                      />
+                      男
+                    </label>
+                    <label className={`gender-option ${gender === 'female' ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        name="gender-picker"
+                        value="female"
+                        checked={gender === 'female'}
+                        onChange={() => setGender('female')}
+                      />
+                      女
+                    </label>
+                  </div>
+                </div>
+                <div className="date-picker-info">
+                  共找到 <strong>{matchedDates.length}</strong> 个匹配的日期，请选择：
+                </div>
+                <div className="date-list">
+                  {matchedDates.map((date, index) => (
+                    <div
+                      key={index}
+                      className="date-item"
+                      onClick={() => handleDateSelect(date)}
+                    >
+                      <div className="date-solar">{date.solarString}</div>
+                      <div className="date-lunar">{date.lunarString}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

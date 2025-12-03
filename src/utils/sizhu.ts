@@ -452,9 +452,13 @@ function calculateTaigong(monthDizhi: number, dayDizhi: number, monthDi: string)
 /**
  * 计算起运信息
  * 阳男阴女顺行，阴男阳女逆行
- * 顺行：从出生日到下一个节气的天数
- * 逆行：从出生日到上一个节气的天数
+ * 顺行：从出生日到下一个节（不是气）的天数
+ * 逆行：从出生日到上一个节（不是气）的天数
  * 3天折1年，1天折4个月，不足1天折若干日
+ *
+ * 注意：这里使用的是「节」而不是「节气」
+ * 每月有两个节气，前一个叫「节」，后一个叫「气」
+ * 如立春是节，雨水是气；惊蛰是节，春分是气
  */
 function calculateQiyunInfo(
   birthDate: Date,
@@ -470,32 +474,70 @@ function calculateQiyunInfo(
 
   let daysDiff: number;
 
-  if (isShunxing) {
-    // 顺行：计算到下一个节气的天数
-    const nextJieqi = getNextJieqi(birthDate);
-    daysDiff = nextJieqi.daysDiff;
-  } else {
-    // 逆行：计算到上一个节气的天数
-    const prevJieqi = getPreviousJieqi(birthDate);
-    daysDiff = prevJieqi.daysDiff;
+  try {
+    // 使用 lunar-javascript 库获取精确的节（不是节气）
+    const Solar = Lunar.Solar;
+    const solar = Solar.fromDate(birthDate);
+    const lunar = solar.getLunar() as any; // 使用 any 类型绕过类型检查
+
+    if (isShunxing) {
+      // 顺行：计算到下一个节的天数
+      const nextJie = lunar.getNextJie();
+      const nextJieSolar = nextJie.getSolar();
+      const nextJieDate = new Date(
+        nextJieSolar.getYear(),
+        nextJieSolar.getMonth() - 1,
+        nextJieSolar.getDay(),
+        nextJieSolar.getHour(),
+        nextJieSolar.getMinute(),
+        nextJieSolar.getSecond()
+      );
+      daysDiff = (nextJieDate.getTime() - birthDate.getTime()) / (24 * 60 * 60 * 1000);
+    } else {
+      // 逆行：计算到上一个节的天数
+      const prevJie = lunar.getPrevJie();
+      const prevJieSolar = prevJie.getSolar();
+      const prevJieDate = new Date(
+        prevJieSolar.getYear(),
+        prevJieSolar.getMonth() - 1,
+        prevJieSolar.getDay(),
+        prevJieSolar.getHour(),
+        prevJieSolar.getMinute(),
+        prevJieSolar.getSecond()
+      );
+      daysDiff = (birthDate.getTime() - prevJieDate.getTime()) / (24 * 60 * 60 * 1000);
+    }
+  } catch (error) {
+    // 如果 lunar-javascript 库出错，回退到原来的方法
+    console.error('使用 lunar-javascript 计算节气出错，回退到备用方法:', error);
+    if (isShunxing) {
+      const nextJieqi = getNextJieqi(birthDate);
+      daysDiff = nextJieqi.daysDiff;
+    } else {
+      const prevJieqi = getPreviousJieqi(birthDate);
+      daysDiff = prevJieqi.daysDiff;
+    }
   }
 
   // 确保天数为正数
   daysDiff = Math.abs(daysDiff);
 
-  // 3天折1年，1天折4个月
-  const years = Math.floor(daysDiff / 3);
-  const remainingDays = daysDiff % 3;
-  const months = remainingDays * 4;
-  const days = Math.floor((daysDiff % 3 - Math.floor(daysDiff % 3)) * 30);
+  // 新算法：天数 × 4 = 月数，向上取整，避免损耗
+  // 1天折4个月，3天折12个月=1年
+  const totalMonths = Math.ceil(daysDiff * 4); // 向上取整
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+  const days = 0; // 新算法不再计算零头天数
 
-  const description = `约${years}岁${months}个月零${days}日后上运(按岁累加)`;
+  const description = years > 0
+    ? `${years}岁${months > 0 ? months + '个月' : ''}起运`
+    : `${months}个月起运`;
 
   return {
     years,
     months,
     days,
-    totalDays: daysDiff,
+    totalDays: Math.floor(daysDiff),
     isShunxing,
     description
   };
